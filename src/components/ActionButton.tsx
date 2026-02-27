@@ -2,7 +2,7 @@ import type { ComponentChildren, JSX } from 'preact';
 
 type ActionButtonVariant = 'primary' | 'success' | 'danger' | 'ghost';
 
-interface ActionButtonProps extends Omit<JSX.HTMLAttributes<HTMLButtonElement>, 'onClick'> {
+interface ActionButtonProps extends Omit<JSX.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   variant: ActionButtonVariant;
   children: ComponentChildren;
   icon?: ComponentChildren;

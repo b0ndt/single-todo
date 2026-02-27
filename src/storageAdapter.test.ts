@@ -1,11 +1,21 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { STORAGE_KEY } from './constants';
 import { consumeStorageCorruptRecovery, createStorageAdapter } from './storageAdapter';
 
 describe('storage adapter', () => {
+  const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
   beforeEach(() => {
     localStorage.clear();
     consumeStorageCorruptRecovery();
+  });
+
+  afterEach(() => {
+    warnSpy.mockClear();
+  });
+
+  afterAll(() => {
+    warnSpy.mockRestore();
   });
 
   it('loads valid todo payloads', () => {

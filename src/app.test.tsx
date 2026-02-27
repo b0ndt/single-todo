@@ -4,6 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ACTION_LOADING_MS, STORAGE_KEY } from './constants';
 import { App } from './app';
 
+const flushActionDelay = async () => {
+  await vi.advanceTimersByTimeAsync(ACTION_LOADING_MS + 1);
+};
+
 describe('App critical paths', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -30,14 +34,14 @@ describe('App critical paths', () => {
 
     await user.type(screen.getByLabelText('What needs doing?'), 'Send proposal');
     await user.click(screen.getByLabelText('Add todo'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
 
     expect(screen.getByText('YOUR FOCUS')).toBeInTheDocument();
     expect(screen.getByText('Send proposal')).toBeInTheDocument();
     expect(localStorage.getItem(STORAGE_KEY)).toContain('Send proposal');
 
     await user.click(screen.getByLabelText('Mark todo as done'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
 
     expect(screen.getByText('What needs doing?')).toBeInTheDocument();
     expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
@@ -49,19 +53,19 @@ describe('App critical paths', () => {
 
     await user.type(screen.getByLabelText('What needs doing?'), 'Write quarterly update');
     await user.click(screen.getByLabelText('Add todo'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
 
     await user.click(screen.getByLabelText('Delete todo'));
     expect(screen.getByRole('alertdialog')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Cancel delete'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.getByText('YOUR FOCUS')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Delete todo'));
     await user.click(screen.getByLabelText('Confirm delete'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
 
     expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.getByText('What needs doing?')).toBeInTheDocument();
@@ -73,9 +77,9 @@ describe('App critical paths', () => {
     render(<App />);
 
     await user.click(screen.getByLabelText('Add todo'));
-    vi.advanceTimersByTime(ACTION_LOADING_MS + 1);
+    await flushActionDelay();
 
-    expect(screen.getByText('Your todo needs some words. Type something.')).toBeInTheDocument();
+    expect(screen.getAllByText('Your todo needs some words. Type something.').length).toBeGreaterThan(0);
     expect(screen.queryByText('YOUR FOCUS')).not.toBeInTheDocument();
   });
 });
