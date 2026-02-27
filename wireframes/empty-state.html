@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>single-todo — Empty State</title>
+<style>
+/* === RESET === */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* === TOKENS === */
+:root {
+  --color-void: #0A0A0F;
+  --color-surface: #12121A;
+  --color-surface-raised: #1A1A2E;
+  --color-surface-hover: #222240;
+  --color-surface-active: #2A2A4A;
+  --color-neon: #00F0FF;
+  --color-neon-20: #00F0FF33;
+  --color-neon-40: #00F0FF66;
+  --color-neon-70: #00F0FFB3;
+  --color-success: #00FF88;
+  --color-danger: #FF3366;
+  --color-warning: #FFB800;
+  --color-text-primary: #E8E8F0;
+  --color-text-secondary: #8888A0;
+  --color-text-disabled: #4A4A60;
+  --color-border: #FFFFFF08;
+  --color-border-strong: #FFFFFF14;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --text-hero: 48px;
+  --text-headline: 32px;
+  --text-body: 16px;
+  --text-small: 14px;
+  --text-label: 12px;
+  --text-counter: 12px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-inset: inset 2px 3px 6px #00000060, inset -1px -1px 2px #FFFFFF06;
+  --shadow-surface: 2px 3px 8px #00000040, 1px 1px 2px #00000020;
+
+  --glow-idle: 0 0 8px #00F0FF11;
+  --glow-hover: 0 0 16px #00F0FF33, 0 0 40px #00F0FF11;
+  --glow-focus: 0 0 20px #00F0FF66, 0 0 60px #00F0FF22, 0 0 120px #00F0FF0A;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 400ms;
+  --duration-dramatic: 600ms;
+}
+
+/* === GLOBAL === */
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background: var(--color-void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-void);
+}
+
+/* === APP SHELL === */
+.app-shell {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  background-color: var(--color-void);
+  background-image:
+    radial-gradient(ellipse at 30% 20%, #12121A 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, #0D0D15 0%, transparent 40%);
+}
+
+.app-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-12);
+  flex-shrink: 0;
+}
+
+.app-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+}
+
+/* === LOGO === */
+.logo {
+  height: 40px;
+  width: auto;
+  filter: drop-shadow(0 0 8px #00F0FF22);
+  transition: filter var(--duration-fast) ease;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 16px #00F0FF44);
+}
+
+/* === EMPTY VISUAL (ORB) === */
+.empty-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fade-in var(--duration-dramatic) var(--ease-spring) forwards;
+}
+
+.orb {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  animation:
+    orb-float 4s var(--ease-in-out) infinite,
+    orb-glow-shadow 4s var(--ease-in-out) infinite;
+}
+
+.orb-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    #00F0FF44 0%,
+    #00F0FF18 30%,
+    #00F0FF08 50%,
+    transparent 70%
+  );
+  border: 1px solid #00F0FF33;
+  box-shadow:
+    inset 0 0 30px #00F0FF11,
+    inset -10px -10px 20px #00000044;
+}
+
+.orb-reflection {
+  width: 80px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #00F0FF11 0%, transparent 70%);
+  margin-top: var(--space-3);
+  animation: reflection-pulse 4s var(--ease-in-out) infinite;
+}
+
+/* === HEADLINE === */
+.headline {
+  font-size: var(--text-hero);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 4px #00000080, 0 -1px 0 #FFFFFF08;
+  text-align: center;
+  animation: fade-up 500ms var(--ease-out) forwards;
+  animation-delay: 100ms;
+  opacity: 0;
+}
+
+.supporting-text {
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: calc(-1 * var(--space-6));
+  animation: fade-up 500ms var(--ease-out) forwards;
+  animation-delay: 200ms;
+  opacity: 0;
+}
+
+/* === INPUT GROUP === */
+.input-section {
+  width: 100%;
+  max-width: 400px;
+  animation: fade-up 500ms var(--ease-out) forwards;
+  animation-delay: 300ms;
+  opacity: 0;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: stretch;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-inset);
+  transition: border-color var(--duration-fast) ease,
+              box-shadow var(--duration-fast) ease;
+  overflow: hidden;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--color-neon-40);
+  box-shadow: var(--shadow-inset), var(--glow-focus);
+}
+
+.input-wrapper.error {
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-inset), 0 0 20px #FF336666, 0 0 60px #FF336622;
+  animation: input-shake 300ms ease-out;
+}
+
+.todo-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: var(--space-4);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  outline: none;
+  caret-color: var(--color-neon);
+}
+
+.todo-input::placeholder {
+  color: var(--color-text-disabled);
+}
+
+.todo-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-height: 48px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  color: var(--color-neon);
+  cursor: pointer;
+  transition: background-color var(--duration-instant) ease,
+              box-shadow var(--duration-fast) ease;
+}
+
+.todo-submit:hover {
+  background: var(--color-surface-hover);
+}
+
+.todo-submit:active {
+  background: var(--color-surface-active);
+}
+
+.todo-submit:focus-visible {
+  outline: 2px solid var(--color-neon);
+  outline-offset: -2px;
+  box-shadow: var(--glow-focus);
+}
+
+/* === CHARACTER COUNTER === */
+.char-counter {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-2) 0;
+  min-height: 20px;
+}
+
+.char-count {
+  font-size: var(--text-counter);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--color-text-disabled);
+  transition: color var(--duration-instant) ease;
+}
+
+.char-count.warning { color: var(--color-warning); }
+.char-count.danger { color: var(--color-danger); font-weight: 600; }
+.char-count.error-message {
+  color: var(--color-danger);
+  font-weight: 500;
+  letter-spacing: 0;
+  font-size: var(--text-small);
+}
+
+/* === TOAST === */
+.toast-region {
+  position: fixed;
+  bottom: var(--space-6);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  pointer-events: none;
+}
+
+/* === FOCUS === */
+:focus-visible {
+  outline: 2px solid var(--color-neon);
+  outline-offset: 3px;
+  box-shadow: var(--glow-focus);
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* === ANIMATIONS === */
+@keyframes orb-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes orb-glow-shadow {
+  0%, 100% { box-shadow: 0 0 40px #00F0FF33, 0 0 80px #00F0FF18, 0 0 120px #00F0FF0A; }
+  50% { box-shadow: 0 0 50px #00F0FF44, 0 0 100px #00F0FF22, 0 0 160px #00F0FF11; }
+}
+
+@keyframes reflection-pulse {
+  0%, 100% { opacity: 0.6; transform: scaleX(1); }
+  50% { opacity: 0.9; transform: scaleX(1.1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes input-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(1px); }
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 639px) {
+  .headline { font-size: var(--text-headline); }
+  .orb { width: 80px; height: 80px; }
+  .orb-reflection { width: 56px; height: 14px; }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .app-shell { padding: var(--space-8); }
+  .headline { font-size: 40px; }
+  .orb { width: 100px; height: 100px; }
+  .orb-reflection { width: 68px; height: 17px; }
+}
+
+@media (min-width: 1024px) {
+  .app-shell { padding: var(--space-16); }
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell" role="main" aria-label="single-todo">
+  <header class="app-header">
+    <a href="/" aria-label="single-todo home">
+      <svg class="logo" viewBox="0 0 120 120" width="40" height="40" aria-label="single-todo">
+        <defs>
+          <linearGradient id="frame-edge" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.02"/>
+          </linearGradient>
+          <filter id="neon-glow">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <rect x="8" y="8" width="104" height="104" rx="24" ry="24" fill="url(#frame-edge)" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.5"/>
+        <circle cx="60" cy="56" r="30" fill="#00F0FF" filter="url(#neon-glow)"/>
+        <path d="M47 56 L55 64 L73 46" stroke="#0A0A0F" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="52" cy="48" r="12" fill="#FFFFFF" fill-opacity="0.15"/>
+      </svg>
+    </a>
+  </header>
+
+  <main class="app-content">
+    <!-- Empty Visual: The Orb -->
+    <div class="empty-visual" aria-hidden="true">
+      <div class="orb">
+        <div class="orb-inner"></div>
+      </div>
+      <div class="orb-reflection"></div>
+    </div>
+
+    <!-- Headline -->
+    <h1 class="headline">What needs doing?</h1>
+    <p class="supporting-text">One thing at a time. Add your focus.</p>
+
+    <!-- Input Group -->
+    <div class="input-section">
+      <form class="input-form" role="form" aria-label="Add a todo" onsubmit="handleSubmit(event)">
+        <div class="input-wrapper" id="inputWrapper">
+          <input
+            type="text"
+            class="todo-input"
+            id="todoInput"
+            placeholder="Your one thing…"
+            aria-label="What needs doing?"
+            maxlength="200"
+            autocomplete="off"
+            autocapitalize="sentences"
+            oninput="handleInput()"
+          />
+          <button type="submit" class="todo-submit" aria-label="Add todo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+        <div class="char-counter" aria-live="polite" aria-label="Characters remaining">
+          <span class="char-count" id="charCount"></span>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div class="toast-region" aria-live="assertive" aria-atomic="true" id="toastRegion"></div>
+</div>
+
+<script>
+const input = document.getElementById('todoInput');
+const counter = document.getElementById('charCount');
+const wrapper = document.getElementById('inputWrapper');
+const MAX = 200;
+
+function handleInput() {
+  const len = input.value.length;
+  const remaining = MAX - len;
+  
+  wrapper.classList.remove('error');
+  
+  if (len === 0) {
+    counter.textContent = '';
+    counter.className = 'char-count';
+    return;
+  }
+  
+  counter.textContent = remaining + ' left';
+  
+  if (remaining <= 0) {
+    counter.className = 'char-count danger';
+  } else if (remaining <= 20) {
+    counter.className = 'char-count warning';
+  } else {
+    counter.className = 'char-count';
+  }
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const text = input.value.trim();
+  
+  if (!text) {
+    wrapper.classList.add('error');
+    counter.textContent = 'Your todo needs some words.';
+    counter.className = 'char-count error-message';
+    
+    wrapper.addEventListener('animationend', () => {
+      wrapper.classList.remove('error');
+    }, { once: true });
+    
+    input.focus();
+    return;
+  }
+  
+  alert('Todo created: "' + text + '"\n\n→ This wireframe would transition to active-todo.html');
+}
+
+input.focus();
+</script>
+
+</body>
+</html>
