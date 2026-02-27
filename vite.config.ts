@@ -4,6 +4,9 @@ import preact from '@preact/preset-vite';
 
 export default defineConfig({
   plugins: [preact()],
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(Date.now().toString()),
+  },
   build: {
     target: 'es2022',
     cssCodeSplit: false,

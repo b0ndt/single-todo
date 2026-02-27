@@ -1,4 +1,5 @@
-const CACHE_NAME = 'single-todo-v1';
+const SW_VERSION = new URL(self.location.href).searchParams.get('v') ?? 'v1';
+const CACHE_NAME = `single-todo-${SW_VERSION}`;
 const APP_SHELL_ASSETS = [
   '/',
   '/index.html',

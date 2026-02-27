@@ -53,6 +53,8 @@
 | Dialog card | Glass | `.material-glass` + `--shadow-floating` |
 | Active todo (behind) | Same as Active screen, but dimmed | `filter: brightness(0.4) blur(2px)` |
 
+The glass material is the hero here. The frosted-glass card floats above the dimmed content, catching the 145° light on its top border. The backdrop blur creates a cinematic depth-of-field effect — the todo behind is still visible but defocused, maintaining spatial context.
+
 ---
 
 ## 3. Component Specifications
@@ -193,7 +195,7 @@ Two buttons, side by side. **"Keep it" is primary** (safe action), **"Yes, drop 
 
 | Breakpoint | Changes |
 |-----------|---------|
-| **Mobile (< 640px)** | Dialog: width `calc(100% - 32px)`. Buttons may stack vertically if text overflows. Dialog position stays centered. |
+| **Mobile (< 640px)** | Dialog: width `calc(100% - 32px)`. Buttons stack vertically in column-reverse (Keep it on top, closer to thumb). Dialog position stays centered. |
 | **Tablet+ (≥ 640px)** | Dialog: max-width 360px. Buttons always row. |
 
 ### Mobile Stack Fallback
@@ -226,37 +228,30 @@ On mobile, buttons stack with "Keep it" on top (closer to thumb) and "Yes, drop 
 | Dialog closes (Keep it) | Dialog slides down + fades out, backdrop fades out | 200ms | `--ease-in` |
 | Dialog closes (Yes, drop it) | Dialog fades out + slight scale down, backdrop fades, then Active → Empty transition plays | 200ms + 300ms | `--ease-in` |
 
-### Open Sequence
+### Open Choreography
 
-```css
-.confirm-backdrop {
-  animation: backdrop-enter 200ms var(--ease-out) forwards;
-}
-
-.confirm-dialog {
-  animation: dialog-enter 300ms var(--ease-spring) forwards;
-  animation-delay: 50ms;
-}
+```
+0ms      → Backdrop: fade in (200ms, ease-out)
+50ms     → Dialog: slide up + scale (300ms, spring)
+350ms    → Focus moves to "Keep it" button
 ```
 
-### Close Sequence
+### Close Choreography (Cancel)
 
-```css
-@keyframes dialog-exit {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 8px)) scale(0.98);
-  }
-}
+```
+0ms      → Dialog: slide down + fade out (200ms, ease-in)
+0ms      → Backdrop: fade out (200ms, ease-in)
+200ms    → Dialog removed, focus returns to "Drop it" button on Active screen
+```
 
-@keyframes backdrop-exit {
-  0% { opacity: 1; }
-  100% { opacity: 0; }
-}
+### Close Choreography (Confirm Delete)
+
+```
+0ms      → Dialog: fade out + scale down (200ms, ease-in)
+0ms      → Backdrop: fade out (200ms, ease-in)
+200ms    → Active → Empty transition plays (card-exit, 300ms)
+350ms    → Toast: "Dropped. Fresh start." slides up (300ms, spring)
+500ms    → Empty state entry sequence begins
 ```
 
 ---
@@ -297,3 +292,4 @@ Focus trap implementation:
 |----------|--------|
 | Screen spec (this file) | ✅ Complete |
 | Wireframe prototype | `wireframes/confirm-delete.html` |
+| Visual mockup prompt | `docs/design/visual-prompts.md` → `mockup-confirm-delete` |

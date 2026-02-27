@@ -206,12 +206,12 @@ export function App() {
     state.status === 'empty' ? '' : formatAddedTimestamp(state.todo.createdAt, nowValue);
 
   return (
-    <div class="app-shell" role="main" aria-label="single-todo">
+    <div class="app-shell">
       <header class="app-header">
         <Logo />
       </header>
 
-      <main class="app-content">
+      <main class="app-content" aria-label="single-todo">
         {state.status === 'empty' ? (
           <section class="empty-screen">
             <EmptyVisual />

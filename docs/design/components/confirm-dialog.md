@@ -8,6 +8,8 @@
 
 The ConfirmDialog is a modal overlay used for the delete confirmation flow. It consists of a frosted-glass card centered over a dark backdrop. The dialog implements a focus trap and responds to Escape key.
 
+The glass material is deliberately chosen for this component — it keeps the active todo visible (but blurred) behind the dialog, maintaining spatial context. The user can see what they're about to delete, creating a stronger emotional connection to the decision.
+
 ---
 
 ## Variants

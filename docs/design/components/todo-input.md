@@ -8,6 +8,8 @@
 
 A compound input group that combines a text input and a submit button into a single debossed surface. Includes a character counter below. Only visible when no active todo exists (`status: "empty"`).
 
+The input group uses the Matte Dark material with an inset shadow — it looks carved into the surface, like a slot in a control panel. When focused, the neon glow ring wraps the entire group, signaling that this is the active control.
+
 ---
 
 ## Variants
@@ -53,7 +55,6 @@ A compound input group that combines a text input and a submit button into a sin
       class="todo-submit"
       aria-label="Add todo"
     >
-      <!-- Arrow icon SVG -->
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M5 12h14M12 5l7 7-7 7"/>
       </svg>

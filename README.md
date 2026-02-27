@@ -20,6 +20,12 @@ single-todo is a dark-mode, offline-capable Preact app that intentionally allows
 - Responsive behavior from mobile through desktop
 - Token-driven design system styling
 
+## Design assets
+
+- Runtime brand assets are loaded from `public/` (`logo.svg`, `logo-dark.svg`, `logo-light.svg`, `favicon.svg`).
+- Screen/layout fidelity is implemented from `wireframes/*.html` and the design specs in `docs/design/`.
+- `docs/design/mockups/*.png` assets are treated as visual references when present; the shipped UI does not depend on those files at runtime.
+
 ## Setup
 
 ```bash
@@ -55,3 +61,4 @@ If browser storage is unavailable, the app falls back to an in-memory store for 
 - SPA rewrite to `index.html`
 - immutable asset caching for `/assets/*`
 - revalidation headers for `index.html` and `sw.js`
+- service worker registration with a per-build version query (`/sw.js?v=<build-id>`) to avoid stale shell caches after deploys

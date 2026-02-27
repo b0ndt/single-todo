@@ -16,6 +16,24 @@
 4. **Physics, not decoration** — Animations obey spring physics and momentum. Nothing teleports.
 5. **Depth hierarchy** — Background → Surface → Raised → Floating. Each layer has distinct material and shadow.
 
+### The 145° Light Source
+
+```
+    145°
+   ╲
+    ╲   ☀ Light
+     ╲
+  ┌──────────┐
+  │          │  ←  Highlight on top-left edges
+  │  Surface │
+  │          │  
+  └──────────┘
+        ╲
+         ╲  Shadow falls bottom-right
+```
+
+All visual decisions — border asymmetry, shadow offsets, specular highlights, gradient directions — reference this single light vector.
+
 ---
 
 ## 2. Materials
@@ -32,6 +50,8 @@ The void. The stage on which everything sits.
     radial-gradient(ellipse at 70% 80%, #0D0D15 0%, transparent 40%);
 }
 ```
+
+The void is not flat black — it has subtle vignetting. Two soft radial gradients create barely-perceptible depth, as if the screen itself is a concave surface catching ambient light from the top-left.
 
 ### 2.2 Brushed Metal (Surface)
 
@@ -55,6 +75,8 @@ Primary card and panel material. Has a subtle directional grain texture.
   border-right-color: #00000030;
 }
 ```
+
+The grain runs at 145° — aligned with the light source. The border is asymmetric: top-left edges catch light (brighter), bottom-right edges fall into shadow (darker). This creates the illusion of a physical panel lit from one side.
 
 ### 2.3 Matte Dark (Elevated Surface)
 
@@ -82,6 +104,8 @@ For modals and floating dialogs. Frosted glass effect with backdrop blur.
   border-top-color: #FFFFFF18;
 }
 ```
+
+The glass has 80% opacity — enough to blur the content behind while remaining translucent. The top border is brighter (catching light), reinforcing the 145° source.
 
 ### 2.5 Material Depth Map
 
@@ -159,6 +183,22 @@ All shadows cast from the **145° light source** (top-left). This means shadows 
 | Confirm dialog | `--shadow-floating` | Highest elevation |
 | Toast | `--shadow-toast` | Glow + shadow |
 
+### 3.3 Shadow Layering Principle
+
+Shadows stack with the depth hierarchy. A floating element has **both** its own shadow and the cumulative depth below it:
+
+```
+Toast:    shadow-toast (dramatic)
+  ↑
+Dialog:   shadow-floating (deep)
+  ↑
+Card:     shadow-raised (medium)
+  ↑
+Surface:  shadow-surface (subtle)
+  ↑
+Void:     no shadow (floor)
+```
+
 ---
 
 ## 4. Neon Glow System
@@ -198,6 +238,18 @@ Glow is the lifeblood of the visual language. It is never arbitrary.
   --glow-danger-focus: 0 0 20px #FF336666, 0 0 60px #FF336622;
 }
 ```
+
+### 4.3 Glow Anatomy
+
+Each glow has three layers that create a realistic light falloff:
+
+```
+Layer 1 (inner):   0 0 20px  — tight, saturated core
+Layer 2 (mid):     0 0 60px  — softer spread
+Layer 3 (outer):   0 0 120px — wide, barely visible halo
+```
+
+This three-layer approach mimics real neon light physics: bright core, diffuse mid-range, atmospheric scatter.
 
 ---
 
@@ -302,6 +354,8 @@ Labels that look stamped into the surface:
 }
 ```
 
+The top shadow (`0 1px 0`) simulates light catching the bottom edge of the stamped letter. The bottom shadow (`0 -1px 0`) simulates the shadow inside the stamp. Together they create a letters-pressed-into-metal illusion.
+
 ### 6.4 Debossed Typography
 
 Headings that look pressed into the surface, catching light:
@@ -402,9 +456,6 @@ Text that glows:
 | `--bp-lg` | 1024px | Max-width container. Generous white space. |
 
 ```css
-/* Mobile-first (default styles) */
-/* ... base styles ... */
-
 @media (min-width: 640px) {
   .app-container {
     padding: var(--space-8);
@@ -461,6 +512,11 @@ All interactive elements meet WCAG 2.1 AA minimum:
   --ease-bounce: cubic-bezier(0.34, 1.8, 0.64, 1);
 }
 ```
+
+**Easing philosophy:**
+- **`--ease-spring`** is the signature easing. It overshoots slightly (1.56 control point), then settles — like a physical object with elasticity. Used for entrances.
+- **`--ease-out`** is used for things coming to rest. Strong initial velocity, gentle stop.
+- **`--ease-in`** is used for exits. Slow start, rapid departure. Like dropping something.
 
 ### 10.2 Duration Scale
 
@@ -624,7 +680,31 @@ All interactive elements meet WCAG 2.1 AA minimum:
 }
 ```
 
-### 10.5 Reduced Motion
+#### Input Shake (Validation Error)
+
+```css
+@keyframes input-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(1px); }
+}
+```
+
+The shake uses decreasing amplitude (2px → 2px → 2px → 1px → 0px) to simulate damped oscillation — a spring that is losing energy. This feels physical rather than mechanical.
+
+### 10.5 Micro-Interaction Choreography
+
+| Interaction | Phase 1 | Phase 2 | Phase 3 |
+|------------|---------|---------|---------|
+| **Button hover** | Border brightens (instant) | Glow intensifies (200ms) | Transform Y -1px (200ms, spring) |
+| **Button press** | Transform Y 0 (instant) | Shadow switches to inset (instant) | Glow intensifies to focus level |
+| **Input focus** | Border shifts to neon-40 (200ms) | Glow ring appears (200ms) | Caret pulses cyan |
+| **Todo creation** | Card scales up 0.95→1 (400ms, spring) | Glow pulse fires (800ms) | Toast slides up (300ms, delayed 200ms) |
+| **Todo completion** | Card flashes green glow (150ms) | Card scales down + fades (300ms) | Toast + empty state (staggered 100ms) |
+
+### 10.6 Reduced Motion
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -671,6 +751,16 @@ Icons are **24×24px**, **1.5px stroke**, **round line-cap**, **round line-join*
 
 All icons are inline SVG for zero HTTP requests and full CSS control (color via `currentColor`, glow via `filter: drop-shadow()`).
 
+### 11.4 Icon Glow Effect
+
+When an icon sits inside an interactive element, it inherits the glow through `currentColor` + `filter`:
+
+```css
+.btn:hover .icon {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+```
+
 ---
 
 ## 12. Focus Indicators
@@ -689,6 +779,8 @@ Visible, high-contrast, branded:
   outline: none;
 }
 ```
+
+The focus indicator is not a generic browser ring — it is a neon glow that matches the brand's light language. The `outline-offset: 3px` creates breathing room between the element and its ring.
 
 ---
 
@@ -824,6 +916,7 @@ Visible, high-contrast, branded:
 - Materials (Section 2) provide exact CSS — implement verbatim.
 - The 145° light source direction is baked into all shadow offset values. Do not change individual shadow angles.
 - Animation keyframes (Section 10.4) are exact — implement as written.
-- `prefers-reduced-motion` (Section 10.5) is mandatory for WCAG compliance.
+- Micro-interaction choreography (Section 10.5) defines the multi-phase interactions — implement each phase.
+- `prefers-reduced-motion` (Section 10.6) is mandatory for WCAG compliance.
 - Inter and JetBrains Mono should be loaded via `@font-face` with `font-display: swap` to avoid FOIT.
 - If Inter is too large for the 50KB budget, fall back to the system font stack — the design still works.

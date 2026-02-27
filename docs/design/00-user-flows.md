@@ -104,15 +104,47 @@ flowchart TD
     
     FOCUS_DONE --> TAB_DELETE[Tab to 'Drop it' button]
     TAB_DELETE --> PRESS_DELETE[Press Enter → confirm dialog opens]
-    PRESS_DELETE --> FOCUS_CONFIRM["Focus: 'Yes, drop it' — glow ring"]
+    PRESS_DELETE --> FOCUS_CONFIRM["Focus: 'Keep it' — glow ring (safe action first)"]
     FOCUS_CONFIRM --> ESC[Press Escape → dialog closes, back to active]
-    FOCUS_CONFIRM --> CONFIRM_ENTER[Press Enter → deleted]
+    FOCUS_CONFIRM --> TAB_DROP["Tab to 'Yes, drop it'"]
+    TAB_DROP --> CONFIRM_ENTER[Press Enter → deleted]
     CONFIRM_ENTER --> FOCUS_INPUT_3[Focus returns to input]
 ```
 
 ---
 
-## 6. Screen Inventory
+## 6. Error Recovery Flow
+
+```mermaid
+flowchart TD
+    CORRUPT((localStorage corrupted)) --> LOAD[App attempts to read]
+    LOAD --> PARSE{JSON parse<br/>succeeds?}
+    PARSE -- "No" --> WIPE[Clear localStorage key]
+    WIPE --> RECOVERY_TOAST["Toast: 'Something went sideways. Your slate has been cleared.'"]
+    RECOVERY_TOAST --> EMPTY[Empty State — fresh start]
+    PARSE -- "Yes" --> SCHEMA{Valid schema?<br/>text: string,<br/>createdAt: number}
+    SCHEMA -- "No" --> WIPE
+    SCHEMA -- "Yes" --> ACTIVE[Active Todo — resume normally]
+```
+
+---
+
+## 7. Delight Moments
+
+Micro-moments that elevate the experience from functional to extraordinary:
+
+| Moment | What Happens | Duration | Why It Matters |
+|--------|-------------|----------|----------------|
+| **First load** | Orb fades in from nothing, starts floating | 600ms | The app feels alive from the first frame |
+| **Todo locked in** | Card springs up with glow pulse, toast slides up | 400ms card + 300ms toast | Commitment feels weighty and real |
+| **Completion** | Card flashes green glow, scales down and fades, toast celebrates | 300ms card + 300ms toast | Achievement is recognized, not just processed |
+| **Deletion confirmed** | Dialog dissolves, card fades, toast acknowledges | 200ms dialog + 300ms card | Letting go is gentle, not violent |
+| **Character limit approach** | Counter color shifts amber at ≤20 | Instant | The interface breathes with the user |
+| **Focus ring** | Neon cyan glow ring with 120px outer halo | 200ms transition | Every focused element feels electric |
+
+---
+
+## 8. Screen Inventory
 
 | # | Screen | State | Key Elements | File |
 |---|--------|-------|-------------|------|
@@ -124,14 +156,14 @@ flowchart TD
 
 | # | State | Trigger | Duration | Visual |
 |---|-------|---------|----------|--------|
-| T-1 | **Validation Error** | Empty/long input submitted | Until corrected | Input glow changes to danger red |
+| T-1 | **Validation Error** | Empty/long input submitted | Until corrected | Input glow changes to danger red, shake animation |
 | T-2 | **Completion Toast** | Todo completed | 3 seconds | Toast slides up from bottom — "Done. What's next?" |
 | T-3 | **Deletion Toast** | Todo deleted (confirmed) | 3 seconds | Toast slides up — "Dropped. Fresh start." |
 | T-4 | **Creation Toast** | Todo added | 3 seconds | Toast slides up — "Locked in. Focus on this." |
 
 ---
 
-## 7. Screen Transitions
+## 9. Screen Transitions
 
 ```mermaid
 stateDiagram-v2
@@ -158,9 +190,23 @@ stateDiagram-v2
 | Confirm → Active | Dialog slides down + backdrop fades out | 200ms | `ease-in` |
 | Confirm → Empty | Dialog + backdrop fade out (200ms), then Active → Empty plays | 200ms + 300ms | `ease-in` + `ease-out` |
 
+### Choreography Stagger Rules
+
+When multiple elements animate simultaneously, they stagger to create a natural flow:
+
+```
+Element 1: 0ms    ─────────▶  (leads)
+Element 2: 50ms      ─────────▶  (follows)
+Element 3: 100ms        ─────────▶  (trails)
+```
+
+- **Toast after card exit:** Toast waits for card exit to reach 50% completion before entering.
+- **Input after card exit:** Input fades in after card exit completes fully.
+- **Dialog after backdrop:** Dialog entry starts 50ms after backdrop entry begins.
+
 ---
 
-## 8. Component Inventory
+## 10. Component Inventory
 
 | # | Component | Used In | File |
 |---|-----------|---------|------|
@@ -189,3 +235,5 @@ stateDiagram-v2
 - Component inventory maps 1:1 to component docs in `docs/design/components/`.
 - Animation durations and easings are exact specs — implement as written.
 - Focus management flow (Section 5) is critical for REQ-009 (Keyboard Accessibility).
+- Error recovery flow (Section 6) corresponds to the corrupt-data handling in `storageAdapter.ts`.
+- Delight moments (Section 7) are the soul of the UX — do not skip them.

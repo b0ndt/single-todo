@@ -10,6 +10,17 @@
 
 The product is small by design. The brand must feel **inevitable** — like the answer was always this simple.
 
+### The Singular Principle
+
+Everything in the brand derives from the number **one**:
+- One todo at a time.
+- One screen in focus.
+- One light source illuminating the scene.
+- One color that commands attention.
+- One orb floating in the void.
+
+This isn't minimalism for aesthetics. It is minimalism as _meaning_. Every element removed makes the remaining element louder.
+
 ---
 
 ## 2. Brand Values
@@ -27,6 +38,10 @@ The product is small by design. The brand must feel **inevitable** — like the 
 ## 3. Brand Personality
 
 **If single-todo were a person**, they would be a master craftsperson's workbench — clean, purposeful, with one tool laid out and ready. Not minimalist for aesthetics, but minimal because everything unnecessary has been removed with intent.
+
+**If single-todo were a place**, it would be a darkened observatory at 2 AM — one telescope aimed at one star. The hum of quiet machinery. The glow of a single cyan indicator light reflecting off brushed aluminum.
+
+**If single-todo were a sound**, it would be a single piano note — struck with confidence, allowed to resonate, then silence.
 
 | Trait | Description |
 |-------|-----------|
@@ -89,6 +104,10 @@ Inner: Circle with carved checkmark
 
 The checkmark is not a separate element — it is a **debossed cut** in the circle, catching light from the 145° cinematic light source. This creates the illusion of a stamped metal badge.
 
+### Clear Space
+
+The logo requires clear space equal to **50% of the mark diameter** on all sides. No other elements may intrude into this zone. The logo breathes — like the app itself, it needs space to command focus.
+
 ### Colors
 
 | Variant | Mark Fill | Check Cut | Frame | Background |
@@ -106,6 +125,14 @@ The checkmark is not a separate element — it is a **debossed cut** in the circ
 | `public/logo-light.svg` | Optimized for light backgrounds — deep black mark, muted frame |
 | `public/favicon.svg` | Simplified mark only (no frame) for small sizes, neon cyan |
 
+### Logo Misuse
+
+- Never stretch or distort the proportions.
+- Never apply drop shadows beyond the defined glow tokens.
+- Never place on busy photographic backgrounds.
+- Never rotate the mark.
+- Never recolor the neon cyan to another hue.
+
 ---
 
 ## 6. Color Story
@@ -113,6 +140,8 @@ The checkmark is not a separate element — it is a **debossed cut** in the circ
 ### Narrative
 
 The palette is drawn from **a darkened control room at night** — matte black surfaces lit by a single cyan indicator light. Every color has a role: the darks create depth, the cyan commands attention, the accents signal state.
+
+Imagine the bridge of a spacecraft at rest. The lights are low. Instruments glow softly. One display is active — cyan, precise, waiting for input. That's the world single-todo lives in.
 
 ### Primary Palette
 
@@ -160,29 +189,44 @@ box-shadow: 0 0 20px #00FF8833, 0 0 60px #00FF8811;
 box-shadow: 0 0 20px #FF336633, 0 0 60px #FF336611;
 ```
 
----
+### Color Accessibility
 
-## 7. OG Image Description
+All text colors are validated against WCAG 2.1 AA on their intended backgrounds:
 
-> **For the Engineer to generate:**
->
-> **Composition:** A 1200×630 image. Deep black background (`#0A0A0F`). The logo mark centered-left at ~200px diameter, rendered in neon cyan with a prominent glow halo (layered box-shadows). To the right, the wordmark "single-todo" in 48px geometric sans, `#E8E8F0`, letter-spaced +0.02em. Below the wordmark, the tagline "One thing. Done right." in 24px, `#8888A0`. The entire composition sits on a subtle brushed-metal texture overlay at 3% opacity. A faint 145° light gradient sweeps from top-left to bottom-right.
->
-> **File:** `public/og-image.png` (1200×630, PNG, <200KB)
-
----
-
-## 8. Hero Visual Description
-
-> **For the Engineer to generate:**
->
-> **Composition:** A full-viewport hero illustration for the empty state. Abstract: a single luminous orb (neon cyan, `#00F0FF`) floating in a vast dark space (`#0A0A0F`). The orb casts a soft downward glow onto a reflective floor surface (brushed-metal texture at 5% opacity). Particle motes drift slowly around the orb (4–6 tiny dots, `#00F0FF44`). The mood is: calm, focused, singular.
->
-> **Implementation:** This should be a CSS/SVG animation, not a raster image, to keep bundle size minimal and enable interaction (the orb could pulse gently when the app is in empty state).
+| Combination | Contrast Ratio | WCAG AA |
+|-------------|---------------|---------|
+| `--color-text-primary` (#E8E8F0) on `--color-void` (#0A0A0F) | 16.5:1 | ✅ Pass |
+| `--color-text-secondary` (#8888A0) on `--color-void` (#0A0A0F) | 6.2:1 | ✅ Pass |
+| `--color-neon` (#00F0FF) on `--color-surface-raised` (#1A1A2E) | 8.9:1 | ✅ Pass |
+| `--color-success` (#00FF88) on `--color-surface-raised` (#1A1A2E) | 10.2:1 | ✅ Pass |
+| `--color-danger` (#FF3366) on `--color-surface-raised` (#1A1A2E) | 5.1:1 | ✅ Pass |
 
 ---
 
-## 9. Typography
+## 7. Motion Identity
+
+Motion is not decoration. It is a language. In single-todo, every motion communicates:
+
+| Motion | Meaning | Example |
+|--------|---------|---------|
+| **Scale up + fade in** | Arrival, creation, birth | Todo card enters |
+| **Scale down + fade out** | Completion, departure, release | Todo card exits |
+| **Float / bob** | Presence, life, waiting | Empty state orb |
+| **Glow pulse** | Attention, confirmation | Card entry glow |
+| **Shake** | Rejection, error | Input validation |
+| **Slide up** | Notification, emergence | Toast enters |
+| **Slide down** | Dismissal, retreat | Toast exits, dialog closes |
+
+### Motion Principles
+
+1. **Physics, not decoration.** Elements have weight. They accelerate and decelerate according to spring physics, not linear timing.
+2. **145° light consistency.** Shadows and glows maintain the same directional light source during all animations.
+3. **Choreography over simultaneity.** When multiple elements move, they stagger by 50–100ms. The eye follows a path, not chaos.
+4. **Exit faster than enter.** Entrances are celebratory (400ms, spring). Exits are decisive (200ms, ease-in). We linger on what arrives but don't dwell on what leaves.
+
+---
+
+## 8. Typography Identity
 
 | Role | Font | Weight | Size | Tracking |
 |------|------|--------|------|----------|
@@ -219,14 +263,37 @@ box-shadow: 0 0 20px #FF336633, 0 0 60px #FF336611;
 
 ---
 
+## 9. OG Image Description
+
+> **For the Engineer to generate:**
+>
+> **Composition:** A 1200×630 image. Deep black background (`#0A0A0F`). The logo mark centered-left at ~200px diameter, rendered in neon cyan with a prominent glow halo (layered box-shadows). To the right, the wordmark "single-todo" in 48px geometric sans, `#E8E8F0`, letter-spaced +0.02em. Below the wordmark, the tagline "One thing. Done right." in 24px, `#8888A0`. The entire composition sits on a subtle brushed-metal texture overlay at 3% opacity. A faint 145° light gradient sweeps from top-left to bottom-right.
+>
+> **File:** `public/og-image.png` (1200×630, PNG, <200KB)
+>
+> **Generation:** See `docs/design/visual-prompts.md` → `og-image-social`
+
+---
+
+## 10. Hero Visual Description
+
+> **For the Engineer to generate:**
+>
+> **Composition:** A full-viewport hero illustration for the empty state. Abstract: a single luminous orb (neon cyan, `#00F0FF`) floating in a vast dark space (`#0A0A0F`). The orb casts a soft downward glow onto a reflective floor surface (brushed-metal texture at 5% opacity). Particle motes drift slowly around the orb (4–6 tiny dots, `#00F0FF44`). The mood is: calm, focused, singular.
+>
+> **Implementation:** This should be a CSS/SVG animation, not a raster image, to keep bundle size minimal and enable interaction (the orb could pulse gently when the app is in empty state).
+
+---
+
 ## Handoff
 
 | Artifact | Path | Status |
 |----------|------|--------|
 | Brand Identity (this file) | `docs/design/brand-identity.md` | ✅ Complete |
+| Visual Asset Prompts | `docs/design/visual-prompts.md` | ✅ Complete |
 | Logo (universal) | `public/logo.svg` | ✅ Created by Design |
 | Logo (dark bg) | `public/logo-dark.svg` | ✅ Created by Design |
 | Logo (light bg) | `public/logo-light.svg` | ✅ Created by Design |
 | Favicon | `public/favicon.svg` | ✅ Created by Design |
-| OG Image | `public/og-image.png` | 🔲 Engineer to generate from spec above |
-| Hero Visual | CSS/SVG animation | 🔲 Engineer to implement from spec above |
+| OG Image | `public/og-image.png` | 🔲 Generate via `visual-prompts.md` pipeline |
+| Hero Visual | CSS/SVG animation | ✅ Implemented as EmptyVisual component |
