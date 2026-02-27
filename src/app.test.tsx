@@ -10,11 +10,14 @@ const flushActionDelay = async () => {
 
 const flushDialogOpen = async () => {
   await vi.advanceTimersByTimeAsync(1);
+  await Promise.resolve();
 };
 
 const flushDialogExit = async () => {
   await vi.advanceTimersByTimeAsync(1);
+  await Promise.resolve();
   await vi.advanceTimersByTimeAsync(CONFIRM_DIALOG_EXIT_MS + 1);
+  await Promise.resolve();
 };
 
 describe('App critical paths', () => {
@@ -104,6 +107,7 @@ describe('App critical paths', () => {
 
     const keepButton = screen.getByLabelText('Cancel delete');
     const confirmButton = screen.getByLabelText('Confirm delete');
+    await Promise.resolve();
     expect(keepButton).toHaveFocus();
 
     await user.tab();
