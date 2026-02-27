@@ -8,6 +8,8 @@
 
 ActionButton is the reusable button component used across all screens. It supports multiple visual variants (primary/neon, success, danger, ghost) and states. All buttons share the same structural base and interaction physics.
 
+The button's interaction model is three-phase: hover lifts the element (-1px Y), press pushes it down (inset shadow), release springs back. This creates a tactile, physical sensation — like pressing a real backlit key.
+
 ---
 
 ## Variants
@@ -30,6 +32,15 @@ ActionButton is the reusable button component used across all screens. It suppor
 | **Active/Pressed** | `translateY(0)` | `--shadow-inset` + variant glow | Intensified |
 | **Focus-visible** | `none` | `--glow-focus` | `2px solid --color-neon` outline |
 | **Disabled** | `none` | `none` | `--color-border` | Opacity 0.4 |
+
+### Interaction Physics
+
+```
+Default:    ──────────  (resting plane)
+Hover:      ─────────   (lifts 1px, shadow deepens)
+Press:      ──────────  (returns to plane, shadow inverts to inset)
+Release:    ─────────   (springs back to hover if still hovering)
+```
 
 ---
 

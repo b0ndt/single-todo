@@ -90,6 +90,8 @@
 }
 ```
 
+The orb's radial gradient is offset to 35% 35% — catching the 145° light source. The brightest point is top-left, fading to transparent bottom-right. This sells the illusion of a sphere lit from one side.
+
 ### 3.3 Headline
 
 - **Text:** "What needs doing?"
@@ -176,7 +178,7 @@ The input and submit button form a single visual unit:
 | **Default** | As described above |
 | **Input focused** | Input group border shifts to `--color-neon-40`, glow ring appears |
 | **Typing** | Character counter becomes visible, updates in real-time |
-| **Validation error (empty)** | Input group border flashes `--color-danger`, counter replaced with error text "Your todo needs some words." in `--color-danger` |
+| **Validation error (empty)** | Input group border flashes `--color-danger`, counter replaced with error text "Your todo needs some words." in `--color-danger`, shake animation plays |
 | **Validation error (too long)** | Counter turns `--color-danger`, shows "0 left" |
 | **Submitting** | Submit button icon briefly pulses, then screen transitions to Active |
 
@@ -200,6 +202,26 @@ The input and submit button form a single visual unit:
 | Screen enters (after complete/delete) | Headline + input fade in staggered (100ms delay between) | 300ms each | `--ease-out` |
 | Validation error | Input border + error text fade in, input shakes subtly (2px horizontal oscillation, 3 cycles) | 300ms | `ease-out` |
 | Orb continuous | Float up/down 8px + glow intensity cycles | 4s | `--ease-in-out`, infinite |
+
+### Entry Choreography (Initial Load)
+
+```
+0ms      → Orb: scale 0.8→1, fade in (600ms, spring)
+200ms    → Headline: fade up from +12px (300ms, ease-out)
+300ms    → Supporting text: fade up (300ms, ease-out)
+400ms    → Input section: fade up (300ms, ease-out)
+600ms    → Orb: begins floating cycle
+```
+
+### Entry Choreography (Return from Active)
+
+```
+0ms      → Headline: fade up (300ms, ease-out)
+100ms    → Supporting text: fade up (300ms, ease-out)
+200ms    → Input section: fade up (300ms, ease-out)
+200ms    → Orb: scale 0.8→1 (600ms, spring)
+300ms    → Input: receives focus
+```
 
 ### Validation Shake
 
@@ -238,3 +260,4 @@ The input and submit button form a single visual unit:
 |----------|--------|
 | Screen spec (this file) | ✅ Complete |
 | Wireframe prototype | `wireframes/empty-state.html` |
+| Visual mockup prompt | `docs/design/visual-prompts.md` → `mockup-empty-state` |

@@ -8,6 +8,8 @@
 
 The logo renders as an inline SVG. It is a rounded-square frame containing a circle with a carved checkmark. The mark uses `currentColor` for universal background compatibility, with an optional neon glow effect.
 
+The logo is the brand in microcosm: a single focused shape, lit by the same 145° light source as everything else, with a neon glow that whispers "this is alive."
+
 ---
 
 ## Variants

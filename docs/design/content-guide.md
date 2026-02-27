@@ -14,6 +14,14 @@
 | **Length** | Shortest correct version wins |
 | **Humor** | Dry, rare, never at the user's expense |
 
+### Writing Philosophy
+
+Words in single-todo are materials, just like brushed metal and neon glow. They have weight, texture, and purpose. A headline is not just text — it is an embossed label stamped into the interface. A CTA is not just a label — it is a command spoken with confidence.
+
+The app has exactly three screens. That means every word carries disproportionate weight. There are no paragraphs of marketing copy to hide behind. Each word is spotlit.
+
+**The test:** Read every string aloud. If it sounds like software wrote it, rewrite it. If you wouldn't say it to a friend, rewrite it. If it has more than 8 words, split it.
+
 ---
 
 ## 2. Headline Templates
@@ -27,6 +35,13 @@ Headlines follow a pattern: **short declarative + period**. The period is a desi
 | After completion | `[Celebration + forward motion].` | "Done. What's next?" |
 | After deletion | `[Release + fresh start].` | "Clean slate." |
 | Error state | `[What went wrong, plainly].` | "That didn't work." |
+
+### Headline Rules
+
+1. Maximum 6 words. No exceptions.
+2. End with a period. Always. The period is the brand's punctuation signature.
+3. No exclamation marks. Excitement is conveyed through motion and glow, not punctuation.
+4. No question marks in toasts or confirmations (questions are for empty state prompts only).
 
 ---
 
@@ -93,6 +108,13 @@ All error messages follow the pattern: **[What happened]** + **[What to do]**.
 | Approaching limit (≤ 20 chars) | Counter color shifts to `--color-warning` | "18 left" |
 | At limit | Counter color shifts to `--color-danger`, input stops accepting | "0 left" |
 
+### Error Copy Principles
+
+1. **Never blame the user.** "Your todo needs some words" not "You forgot to type something."
+2. **Be specific.** "That's over 200 characters" not "Input too long."
+3. **Offer the fix.** Every error message has a second clause with the action: "Type something", "Trim it down."
+4. **Keep the tone.** Errors are spoken calmly, not shouted. No red exclamation icons. The glow handles the urgency.
+
 ---
 
 ## 5. Empty State Content (Real Samples — No Lorem Ipsum)
@@ -114,14 +136,14 @@ The empty state cycles through motivational prompts. Each is a real, human sente
 
 These are realistic, varied examples for design mockups:
 
-| # | Todo Text | Length |
-|---|-----------|-------|
-| 1 | "Buy oat milk" | 12 chars |
-| 2 | "Send the revised proposal to Aya by 3pm" | 41 chars |
-| 3 | "Call the dentist about Tuesday" | 30 chars |
-| 4 | "Review pull request #847 — check the error handling in the auth module" | 71 chars |
-| 5 | "Run" | 3 chars |
-| 6 | "Write the quarterly report intro paragraph and send it to Dana and Priya for review before the Thursday standup" | 112 chars |
+| # | Todo Text | Length | Use In |
+|---|-----------|-------|--------|
+| 1 | "Buy oat milk" | 12 chars | Mobile mockup — short text test |
+| 2 | "Send the revised proposal to Aya by 3pm" | 41 chars | Default wireframe — medium text |
+| 3 | "Call the dentist about Tuesday" | 30 chars | Active state mockup |
+| 4 | "Review pull request #847 — check the error handling in the auth module" | 71 chars | Long text wrapping test |
+| 5 | "Run" | 3 chars | Minimum length edge case |
+| 6 | "Write the quarterly report intro paragraph and send it to Dana and Priya for review before the Thursday standup" | 112 chars | Maximum realistic length test |
 
 ---
 
@@ -139,6 +161,17 @@ These are realistic, varied examples for design mockups:
 2. **Destructive CTAs are never the visual default.** "Drop it" is secondary (muted). "Yes, drop it" is confirmation-only.
 3. **Cancel CTAs are gentle.** "Keep it" (not "Cancel" or "Go back").
 4. **No double negatives.** Never "Don't delete" — use "Keep it".
+5. **CTAs match their glow.** Primary = neon cyan. Success = green. Danger = muted until hovered, then red.
+
+### CTA Personality Map
+
+| CTA | Personality | Why |
+|-----|------------|-----|
+| "Lock it in" | Confident, decisive | You're committing. This is your focus. Own it. |
+| "Done" | Satisfied, final | A full stop. The period in the brand's language. |
+| "Drop it" | Casual, low-pressure | Not "delete" (clinical). Dropping is effortless. |
+| "Keep it" | Reassuring, safe | You made the right choice. Stay the course. |
+| "Yes, drop it" | Deliberate, confirming | You've thought about it. Proceed. |
 
 ---
 
@@ -158,6 +191,16 @@ These are realistic, varied examples for design mockups:
 | Cancel button | `aria-label="Cancel delete"` |
 | Transition announcements | `aria-live="assertive"` on a visually-hidden live region |
 
+### Screen Reader Narrative
+
+When a screen reader user navigates single-todo, they experience this story:
+
+1. **Empty state:** "single-todo, main. What needs doing? One thing at a time. Add your focus. What needs doing? — text input. Add todo — button."
+2. **After adding:** "Locked in. Focus on this. Your focus: Send the revised proposal to Aya by 3pm. Added 5 minutes ago. Mark todo as done — button. Delete todo — button."
+3. **After completing:** "Done. What's next?" (assertive announcement, then empty state resumes)
+
+The screen reader experience mirrors the visual experience: focused, linear, no branching.
+
 ---
 
 ## 9. Timestamp Formatting Rules
@@ -171,6 +214,14 @@ These are realistic, varied examples for design mockups:
 | 2–6 days | "{n} days ago" | "Added 3 days ago" |
 | 7+ days | Date | "Added Feb 20" |
 
+### Timestamp Rules
+
+1. Always prefixed with "Added" — establishes when the todo was created.
+2. Use singular/plural correctly: "1 hour ago" not "1 hours ago".
+3. Abbreviate "minutes" to "min" (saves space, feels casual).
+4. Don't abbreviate "hour" or "day" (they're short enough).
+5. Update every 60 seconds via interval.
+
 ---
 
 ## 10. Writing Checklist
@@ -183,6 +234,7 @@ Before shipping any copy:
 - [ ] No jargon? (No "item", "entry", "record")
 - [ ] Present tense?
 - [ ] Would you say this out loud?
+- [ ] Does it work for screen readers? (ARIA labels match visual text intent)
 
 ---
 
@@ -198,3 +250,4 @@ Before shipping any copy:
 - ARIA labels are specified — use exactly as written.
 - Timestamp formatting should use a lightweight relative-time utility (or hand-rolled — < 20 lines for v1 requirements).
 - Transition toasts should be `aria-live="assertive"` and auto-dismiss after 3 seconds.
+- Error messages follow the two-clause pattern: [What happened]. [What to do]. Both clauses ship.

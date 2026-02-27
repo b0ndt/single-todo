@@ -8,6 +8,8 @@
 
 Toast provides transient feedback after state transitions (todo created, completed, or deleted). It slides up from the bottom of the viewport, displays for 3 seconds, then slides out. Toasts are non-interactive and purely informational.
 
+The toast uses brushed-metal material with a pill shape (`border-radius: 9999px`), giving it the look of a floating indicator badge — like a status light on a control panel that briefly illuminates then fades.
+
 ---
 
 ## Variants

@@ -8,6 +8,8 @@
 
 The EmptyVisual is a decorative animated element shown on the Empty State screen. It depicts a floating, glowing orb that represents the space where a todo will live. It is purely decorative and hidden from screen readers.
 
+The orb is the emotional heart of the empty state. It communicates: "There's nothing here, but this space is alive. It's waiting for you." The gentle float and glow cycle give the app a sense of breathing presence, even when idle.
+
 ---
 
 ## Variants
@@ -155,6 +157,12 @@ The EmptyVisual is a decorative animated element shown on the Empty State screen
   }
 }
 ```
+
+### Material Detail
+
+The orb's radial gradient is offset to `35% 35%` — this places the bright point at the top-left, consistent with the 145° light source. The `inset` box-shadows create an inner shadow at the bottom-right, simulating a translucent sphere catching light on one side.
+
+The reflection below is a squashed ellipse that pulses in sync with the orb's glow cycle, creating the illusion of light bouncing off a floor plane.
 
 ---
 

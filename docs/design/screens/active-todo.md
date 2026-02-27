@@ -54,6 +54,8 @@
 | "Done" button | Surface with success glow on hover | Custom |
 | "Drop it" button | Surface with danger glow on hover | Custom |
 
+The card is the star of this screen. Its brushed-metal grain (145° diagonal lines at 2–3% white opacity) catches the cinematic light source. The asymmetric border (bright top-left, dark bottom-right) reinforces physicality.
+
 ---
 
 ## 3. Component Specifications
@@ -227,7 +229,7 @@ Two buttons side by side, equal width:
 | Complete tap | Card scales down 0.95 + fades out, checkmark icon briefly flashes green | 300ms | `--ease-in` |
 | Delete tap | Transitions to Confirm Delete screen |
 
-### Entry Animation
+### Entry Animation (From Empty State)
 
 ```css
 .todo-card-enter {
@@ -264,6 +266,16 @@ Two buttons side by side, equal width:
 }
 ```
 
+### Completion Choreography
+
+```
+0ms      → Card: green glow flash begins
+150ms    → Card: scale down + fade starts (300ms, ease-in)
+300ms    → Toast: "Done. What's next?" slides up (300ms, spring)
+450ms    → Card fully removed from DOM
+500ms    → Empty state begins entry sequence
+```
+
 ---
 
 ## 7. Accessibility
@@ -285,3 +297,4 @@ Two buttons side by side, equal width:
 |----------|--------|
 | Screen spec (this file) | ✅ Complete |
 | Wireframe prototype | `wireframes/active-todo.html` |
+| Visual mockup prompt | `docs/design/visual-prompts.md` → `mockup-active-todo` |
