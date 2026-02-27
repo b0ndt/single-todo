@@ -150,6 +150,7 @@
   --motion-lift: -1px;
   --opacity-disabled: 0.4;
   --opacity-dimmed: 0.4;
+  --opacity-grain-overlay: 0.16;
   --blur-dimmed: 2px;
   --blur-backdrop: 4px;
   --blur-dialog: 24px;
@@ -204,19 +205,45 @@ body {
 
 .app-shell {
   width: 100%;
-  max-width: var(--size-card-max);
   min-height: 100vh;
   min-height: 100dvh;
-  margin: 0 auto;
   padding: var(--space-4);
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background-color: var(--color-void);
   background-image:
     radial-gradient(ellipse at 30% 20%, var(--color-surface) 0%, transparent 50%),
     radial-gradient(ellipse at 70% 80%, var(--color-void-accent) 0%, transparent 40%);
+}
+
+.app-shell::before,
+.app-shell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: var(--z-base);
+}
+
+.app-shell::before {
+  background-image: repeating-linear-gradient(
+    145deg,
+    transparent,
+    transparent var(--size-grain-step),
+    var(--color-white-02) var(--size-grain-step),
+    var(--color-white-02) var(--size-grain-end)
+  );
+  opacity: var(--opacity-grain-overlay);
+}
+
+.app-shell::after {
+  background:
+    radial-gradient(circle at 22% 12%, var(--color-neon-20) 0%, transparent 48%),
+    radial-gradient(circle at 80% 88%, var(--color-neon-10) 0%, transparent 40%);
 }
 
 .app-header {
@@ -234,6 +261,15 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: var(--z-surface);
+}
+
+.app-header,
+.toast-region,
+.sr-only-live-region {
+  position: relative;
+  z-index: var(--z-surface);
 }
 
 .logo-link {
@@ -253,11 +289,11 @@ body {
 
 .empty-screen {
   width: 100%;
-  max-width: var(--size-input-max);
+  max-width: var(--size-card-max);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
 }
 
 .empty-visual {
@@ -306,12 +342,13 @@ body {
   width: 100%;
   text-align: center;
   font-size: var(--text-headline);
+  margin-bottom: var(--space-2);
 }
 
 .supporting-text {
-  margin-top: var(--space-2);
   margin-bottom: var(--space-8);
   text-align: center;
+  max-width: 30ch;
   color: var(--color-text-secondary);
   font-size: var(--text-body);
 }

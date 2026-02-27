@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/preact';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ACTION_LOADING_MS, CONFIRM_DIALOG_EXIT_MS, STORAGE_KEY } from './constants';
+import { ACTION_LOADING_MS, CONFIRM_DIALOG_EXIT_MS, MAX_TODO_LENGTH, STORAGE_KEY } from './constants';
 import { App } from './app';
 
 const flushActionDelay = async () => {
@@ -133,5 +133,35 @@ describe('App critical paths', () => {
 
     expect(screen.getAllByText('Your todo needs some words. Type something.').length).toBeGreaterThan(0);
     expect(screen.queryByText('YOUR FOCUS')).not.toBeInTheDocument();
+  });
+
+  it('updates character counter warning and danger states', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<App />);
+
+    const input = screen.getByLabelText('What needs doing?');
+
+    await user.type(input, 'x'.repeat(MAX_TODO_LENGTH - 19));
+    const warningCounter = screen.getByText('19 left');
+    expect(warningCounter).toHaveClass('char-count warning');
+
+    await user.type(input, 'y'.repeat(19));
+    const dangerCounter = screen.getByText('0 left');
+    expect(dangerCounter).toHaveClass('char-count danger');
+  });
+
+  it('shows loading state while creating a todo', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<App />);
+
+    await user.type(screen.getByLabelText('What needs doing?'), 'Review release checklist');
+    const submitButton = screen.getByLabelText('Add todo');
+    await user.click(submitButton);
+
+    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveAttribute('aria-busy', 'true');
+
+    await flushActionDelay();
+    expect(screen.getByText('YOUR FOCUS')).toBeInTheDocument();
   });
 });
