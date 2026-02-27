@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'preact/hooks';
-import { COPY } from '../constants';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { CONFIRM_DIALOG_EXIT_MS, COPY } from '../constants';
 import { ActionButton } from './ActionButton';
 
 interface ConfirmDialogProps {
@@ -19,6 +19,30 @@ export const ConfirmDialog = ({
 }: ConfirmDialogProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const [isRendered, setIsRendered] = useState(open);
+  const [isExiting, setIsExiting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setIsRendered(true);
+      setIsExiting(false);
+      return;
+    }
+
+    if (!isRendered) {
+      return;
+    }
+
+    setIsExiting(true);
+    const timerId = window.setTimeout(() => {
+      setIsRendered(false);
+      setIsExiting(false);
+    }, CONFIRM_DIALOG_EXIT_MS);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [open, isRendered]);
 
   useEffect(() => {
     if (!open) {
@@ -63,28 +87,40 @@ export const ConfirmDialog = ({
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      previousFocusRef.current?.focus();
     };
   }, [open, isCancelLoading, isConfirmLoading, onCancel]);
 
-  if (!open) {
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+
+    if (previousFocusRef.current?.isConnected) {
+      previousFocusRef.current.focus();
+    }
+  }, [open]);
+
+  if (!isRendered) {
     return null;
   }
+
+  const backdropClassName = ['confirm-backdrop', isExiting ? 'exiting' : 'entering'].join(' ');
+  const dialogClassName = ['confirm-dialog', isExiting ? 'exiting' : 'entering'].join(' ');
 
   return (
     <>
       <div
-        class="confirm-backdrop entering"
+        class={backdropClassName}
         aria-hidden="true"
         onClick={() => {
-          if (!isCancelLoading && !isConfirmLoading) {
+          if (open && !isCancelLoading && !isConfirmLoading) {
             onCancel();
           }
         }}
       />
       <div
         ref={dialogRef}
-        class="confirm-dialog entering"
+        class={dialogClassName}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-title"

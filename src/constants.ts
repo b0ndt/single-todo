@@ -4,7 +4,8 @@ export const STORAGE_KEY = 'single-todo';
 export const MAX_TODO_LENGTH = 200;
 export const TOAST_VISIBLE_MS = 3000;
 export const TOAST_EXIT_MS = 200;
-export const ACTION_LOADING_MS = 200;
+export const ACTION_LOADING_MS = 300;
+export const CONFIRM_DIALOG_EXIT_MS = 200;
 
 export const COPY = {
   emptyHeadline: 'What needs doing?',

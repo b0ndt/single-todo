@@ -1,6 +1,6 @@
 import { useMemo } from 'preact/hooks';
 import type { RefObject } from 'preact';
-import { MAX_TODO_LENGTH } from '../constants';
+import { COPY, MAX_TODO_LENGTH } from '../constants';
 import { ArrowRightIcon } from './Icons';
 import { CharCounter } from './CharCounter';
 
@@ -43,7 +43,7 @@ export const TodoInput = ({
           ref={inputRef}
           type="text"
           class="todo-input"
-          placeholder="Your one thing…"
+          placeholder={COPY.inputPlaceholder}
           aria-label="What needs doing?"
           value={value}
           maxlength={MAX_TODO_LENGTH}
