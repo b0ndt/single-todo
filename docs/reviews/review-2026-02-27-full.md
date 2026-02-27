@@ -2,14 +2,14 @@
 
 **Date:** 2026-02-27
 **Reviewer:** QA Reviewer (automated)
-**Scope:** Full codebase review — correctness, security, performance, code quality, tests, a11y, design compliance
-**Commit branch:** `cursor/single-todo-full-review-2202`
+**Scope:** Full codebase review — correctness, security (OWASP), performance, code quality, tests, a11y, design compliance
+**Commit branch:** `cursor/single-todo-project-review-0ac8`
 
 ---
 
 ## Summary
 
-The single-todo application is well-architected and cleanly implemented. All 14 unit tests pass. The production build (JS 9.76 KB + CSS 4.34 KB gzipped) is well within the 50 KB bundle budget. The state machine correctly enforces the single-todo invariant. No API keys or environment variables are required (client-side only). Five findings are documented below — none are blockers.
+The single-todo application is well-architected and cleanly implemented. All 16 unit/integration tests pass across 4 test files. The production build (JS 9.93 KB + CSS 4.47 KB gzipped, ~14.4 KB total) is well within the 50 KB bundle budget. The state machine correctly enforces the single-todo invariant. TypeScript compiles with zero errors. No API keys or environment variables are required (client-side only). Five findings are documented below — none are blockers.
 
 ---
 
@@ -17,77 +17,103 @@ The single-todo application is well-architected and cleanly implemented. All 14 
 
 - **Required API keys / env vars:** None. v1 is entirely client-side.
 - **Blockers:** None.
-- **Build:** `npm run build` succeeds. Output in `dist/`.
-- **Tests:** `npm test` — 14/14 pass (4 test files, 1.88s).
+- **Build:** `npm run build` succeeds. Output in `dist/`. (JS 25.23 KB raw / 9.93 KB gzip, CSS 19.71 KB raw / 4.47 KB gzip)
+- **Tests:** `npm test` — 16/16 pass (4 test files, ~2.5s).
+- **Typecheck:** `npm run typecheck` — zero errors.
 
 ---
 
 ## Findings
 
-### 1. WARNING — Service worker cache invalidation is manual
+### 1. WARNING — `localStorage` write operations lack try-catch (correctness)
+
+**Category:** Correctness / Resilience
+**File:** `src/storageAdapter.ts` lines 75–82, 84–91
+
+`saveTodo()` and `removeTodo()` call `storage.setItem()` / `storage.removeItem()` without a try-catch. While `getSafeStorage()` gracefully handles `localStorage` being entirely unavailable (falling back to in-memory), it does not guard against write-time exceptions on an accessible `Storage` object:
+
+- `QuotaExceededError` — storage full (especially on mobile or with other sites consuming quota).
+- `DOMException` / `SecurityError` — certain restricted browser contexts (e.g., older Safari private browsing would allow reads but throw on writes).
+
+If `saveTodo()` throws inside `addTodo()`:
+
+1. `transition()` never fires — state remains `empty`, but no todo was persisted.
+2. The exception propagates through the `setTimeout` in `queueAction` — unhandled.
+3. `setIsSubmitting(false)` never executes — the submit button is stuck in a permanent loading/disabled state.
+4. The user is locked out until they refresh the page.
+
+**Impact:** Users on storage-constrained devices or restricted contexts can hit a non-recoverable stuck UI.
+**Recommendation:** Wrap `storage.setItem()` and `storage.removeItem()` in try-catch within the adapter. On write failure, either fall back to `memoryTodo` (best-effort) and surface a toast, or return an error that `addTodo` can propagate via `AddTodoResult`.
+
+---
+
+### 2. WARNING — No security headers in deployment config (OWASP)
+
+**Category:** Security (OWASP A05:2021 — Security Misconfiguration)
+**File:** `vercel.json`
+
+The `vercel.json` only sets `Cache-Control` headers. No security-hardening headers are configured:
+
+| Missing Header | Risk |
+|---|---|
+| `Content-Security-Policy` | No CSP means browser extensions, injected scripts, or a CDN compromise could execute arbitrary JS in the app's origin. |
+| `X-Content-Type-Options: nosniff` | Browsers might MIME-sniff responses, potentially executing non-JS files as scripts. |
+| `X-Frame-Options: DENY` | The app can be embedded in an iframe on a malicious site (clickjacking). |
+| `Strict-Transport-Security` | No HSTS directive; the first visit could be intercepted over HTTP before redirect to HTTPS. |
+
+While the app has no backend and Preact auto-escapes JSX, defense-in-depth headers are standard practice and required for a strong Lighthouse security score.
+
+**Impact:** Low immediate risk (no backend, no secrets), but leaves the door open for future regressions and fails OWASP security misconfiguration checks.
+**Recommendation:** Add a `Content-Security-Policy` header (e.g., `default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'`), along with `X-Content-Type-Options`, `X-Frame-Options`, and `Strict-Transport-Security` in the `vercel.json` headers block.
+
+---
+
+### 3. WARNING — Service Worker pre-cache list is manually maintained
 
 **Category:** Correctness / Operations
-**Files:** `public/sw.js`, `vite.config.ts`
+**File:** `public/sw.js` lines 3–12
 
-The service worker is a static file in `public/` with a hardcoded `CACHE_NAME = 'single-todo-v1'`. The Vite build outputs non-hashed filenames (`assets/app.js`, `assets/app.css`). When new code is deployed:
+The `APP_SHELL_ASSETS` array is a hardcoded list of paths:
 
-- If `sw.js` content has not changed, the browser does not install a new SW.
-- The old SW continues serving stale cached assets indefinitely.
-
-ADR-003 acknowledges this: *"Cache invalidation relies on a new SW file being generated each build (hash in filename or SW version bump)."* However, no build-time automation exists to bump `CACHE_NAME` or inject a build hash into `sw.js`.
-
-**Impact:** Users may be stuck on a stale version after deploy until they clear site data.
-**Recommendation:** Inject a build timestamp or content hash into `sw.js` at build time (e.g., via a Vite plugin or post-build script), or switch to hashed asset filenames so the pre-cache list itself changes the SW content.
-
----
-
-### 2. WARNING — Duplicate `main` landmarks (a11y)
-
-**Category:** Accessibility (WCAG 2.1 AA)
-**File:** `src/app.tsx` lines 209, 214
-
-The outer shell div has `role="main"`:
-```tsx
-<div class="app-shell" role="main" aria-label="single-todo">
+```js
+const APP_SHELL_ASSETS = [
+  '/', '/index.html',
+  '/assets/app.js', '/assets/app.css',
+  '/logo.svg', '/logo-dark.svg', '/logo-light.svg', '/favicon.svg',
+];
 ```
 
-Inside it, there is a `<main>` element:
-```tsx
-<main class="app-content">
-```
+Issues:
 
-This creates two `main` landmarks in the accessibility tree. Screen readers announce both, which is confusing. WCAG best practice: a page should have exactly one `main` landmark.
+1. **Atomic failure:** `cache.addAll()` rejects if *any* URL returns a non-ok response. If the build output changes (e.g., a chunk split introduces `chunk-vendor.js`) or a file is renamed, the SW install fails silently and users lose offline support entirely.
+2. **Unused asset cached:** `/logo.svg` is pre-cached but never referenced by any component — only `/logo-dark.svg` is used in `Logo.tsx`. This wastes cache space.
+3. **No build-time validation:** Nothing verifies that the pre-cache list matches actual `dist/` output.
 
-**Impact:** Screen reader users encounter two "main" regions, reducing navigability.
-**Recommendation:** Remove `role="main"` from the outer `<div>` and keep the semantic `<main>` element. The outer div can remain as a generic container or use `role="application"` if needed, though a plain `<div>` is sufficient.
+The version-based cache invalidation *does* work correctly: `registerServiceWorker.ts` appends `__APP_BUILD_ID__` (a build-time timestamp from `vite.config.ts`) as a query parameter, which changes the SW registration URL on each build, triggering a new install and old-cache cleanup. This is well implemented.
 
----
-
-### 3. WARNING — Dialog and card exit animations do not play
-
-**Category:** Design Compliance
-**Files:** `src/components/ConfirmDialog.tsx`, `src/app.tsx`
-
-The design spec (confirm-delete.md §6, user-flows.md §7) defines exit animations for the confirm dialog (`dialog-exit`, `backdrop-exit`) and a staggered close sequence. The implementation unmounts the dialog immediately when `open` becomes `false` (`if (!open) return null;`), so no exit animation plays on cancel or confirm.
-
-Additionally, the card-complete animation (`card-complete`, 300ms) starts when `isCompleting` is set to `true`, but the state machine's `completeTodo()` fires after only `ACTION_LOADING_MS` (200ms), unmounting the card before the 300ms animation finishes.
-
-**Impact:** Visual transitions are abrupt rather than choreographed per spec. Functional correctness is unaffected.
-**Recommendation:**
-- For dialog exit: delay unmount until the exit animation completes (e.g., set an `isExiting` state, apply exit CSS class, then unmount after animation duration).
-- For card complete: increase `ACTION_LOADING_MS` to match `--duration-normal` (300ms), or decouple the animation from the state transition timing.
+**Impact:** Build output drift could silently break offline support. Diagnosed only when an end-user reports the app not working offline.
+**Recommendation:** Generate the asset list at build time (e.g., via a Vite plugin that reads the manifest and injects the list into `sw.js`), or switch to a tool like Workbox with `injectManifest` mode that automates precache list generation.
 
 ---
 
-### 4. WARNING — Action buttons lack `flex: 1` on todo card
+### 4. WARNING — Card-complete animation timing not synchronized with unmount
 
 **Category:** Design Compliance
-**File:** `src/styles.css` (`.action-row`, `.btn`)
+**Files:** `src/app.tsx` lines 173–180, `src/constants.ts`
 
-The active-todo.md spec defines action buttons as "Two buttons side by side, equal width" with `flex: 1`. In the CSS, `.confirm-actions .btn` correctly gets `flex: 1`, but `.action-row .btn` does not. The "Done" and "Drop it" buttons on the todo card are content-sized, not equal width.
+The completion flow:
 
-**Impact:** Minor visual deviation from spec on desktop. On mobile, buttons stack full-width so the difference is invisible.
-**Recommendation:** Add `.action-row .btn { flex: 1; }` to match the spec.
+1. `setIsCompleting(true)` → queues an async Preact re-render
+2. `queueAction(() => { machine.completeTodo(); })` → starts a `setTimeout` at `ACTION_LOADING_MS` (300ms)
+3. Re-render fires (a few ms later) → DOM gets `.exiting-complete` class → CSS animation `card-complete` begins (duration: `--duration-normal` = 300ms)
+4. At 300ms from step 2: `completeTodo()` fires → state transitions to `empty` → card unmounts
+
+Because the CSS animation starts *after* the `setTimeout` is already ticking (due to the async re-render in step 3), the animation gets ~295–298ms to run instead of the full 300ms. The card unmounts before the final animation frame (opacity: 0, scale: 0.95) fully renders.
+
+The design spec (active-todo.md §6, "Completion Choreography") defines a specific stagger sequence where the card should fully complete its exit before the empty state begins.
+
+**Impact:** The final ~5ms of the card-complete fade are clipped. With `ease-in` timing, most of the visual change happens late, so the cut is slightly perceptible — the card vanishes at ~5% opacity rather than 0%. Functional correctness is unaffected.
+**Recommendation:** Decouple the animation from the state transition: listen for the `animationend` event on the card, then trigger `completeTodo()`. Alternatively, add a small buffer (e.g., `ACTION_LOADING_MS + 50`) to ensure the animation fully completes before unmount.
 
 ---
 
@@ -96,41 +122,43 @@ The active-todo.md spec defines action buttons as "Two buttons side by side, equ
 **Category:** Code Quality
 **File:** `src/storageAdapter.ts` line 4
 
-`storageRecoveredFromCorruptData` is a module-level boolean shared across all `createStorageAdapter()` instances. This creates implicit coupling — if multiple adapters are created (e.g., in tests), they share this flag. The test suite already mitigates this by calling `consumeStorageCorruptRecovery()` in `beforeEach`.
+`storageRecoveredFromCorruptData` is a module-level `let` shared across all `createStorageAdapter()` instances. If multiple adapters are created (e.g., in tests), they share this flag, creating implicit coupling. The test suite mitigates this by calling `consumeStorageCorruptRecovery()` in `beforeEach`.
 
 **Impact:** Low. Single-instance usage in production. Test isolation is handled.
-**Recommendation:** Consider moving the flag into the adapter instance or into a dedicated recovery-state module to make ownership explicit.
+**Recommendation:** Move the flag into the adapter instance (return it as part of the adapter object), or into a dedicated recovery-state module to make ownership explicit.
 
 ---
 
 ## Requirements Traceability
 
 | Requirement | Priority | Status | Evidence |
-|-------------|----------|--------|----------|
-| REQ-001 Add a Todo | Must | **Pass** | `addTodo()` validates and persists; tested in `stateMachine.test.ts`, `app.test.tsx` |
-| REQ-002 Single-Todo Constraint | Must | **Pass** | State machine rejects `addTodo` when `status !== 'empty'`; input hidden in UI |
-| REQ-003 View Current Todo | Must | **Pass** | `TodoCard` renders active todo; `EmptyVisual` + headline for empty state |
-| REQ-004 Complete a Todo | Must | **Pass** | `completeTodo()` clears localStorage; UI returns to empty; tested |
-| REQ-005 Delete a Todo | Must | **Pass** | `requestDelete` → `confirmDelete` flow; localStorage cleared; tested |
-| REQ-006 Persist in localStorage | Must | **Pass** | `storageAdapter` read/write tested; corrupt data recovery tested |
-| REQ-007 Offline Support | Must | **Pass** ⚠ | SW exists with cache-first strategy; cache invalidation is manual (Finding #1) |
-| REQ-008 Responsive Layout | Must | **Pass** | Media queries at 640px/1024px; touch targets ≥ 44px; mobile column stacking |
-| REQ-009 Keyboard Accessibility | Must | **Pass** | Focus trap in dialog; Escape key handling; tab cycling; focus restoration |
-| REQ-010 Screen Reader Accessibility | Must | **Pass** ⚠ | ARIA labels match spec; `aria-live` regions present; duplicate `main` landmarks (Finding #2) |
-| REQ-011 Input Character Limit | Should | **Pass** | `maxlength=200` on input; `CharCounter` with warning/danger states |
-| REQ-012 Confirmation on Delete | Should | **Pass** | `ConfirmDialog` with `role="alertdialog"`, `aria-modal="true"` |
-| REQ-013 Timestamp Display | Should | **Pass** | `formatAddedTimestamp` utility with 60s refresh interval; all ranges tested |
-| REQ-014 Empty State Illustration | Should | **Pass** | Animated orb with float + glow; responsive sizing; `aria-hidden="true"` |
-| REQ-015 Performance Budget | Must | **Pass** | JS: 9.76 KB gzip, CSS: 4.34 KB gzip — total ~14 KB, well under 50 KB |
+|---|---|---|---|
+| REQ-001 Add a Todo | Must | **Pass** | `addTodo()` validates text, persists to localStorage; tested in `stateMachine.test.ts` (rejects empty/long/duplicate), `app.test.tsx` (end-to-end create flow) |
+| REQ-002 Single-Todo Constraint | Must | **Pass** | State machine rejects `addTodo` when `status !== 'empty'` → `TODO_EXISTS`; input hidden in UI when active; tested |
+| REQ-003 View Current Todo | Must | **Pass** | `TodoCard` renders active todo with text, timestamp; `EmptyVisual` + headline for empty state; tested |
+| REQ-004 Complete a Todo | Must | **Pass** | `completeTodo()` clears localStorage, transitions to empty; tested in `stateMachine.test.ts` and `app.test.tsx` |
+| REQ-005 Delete a Todo | Must | **Pass** | `requestDelete` → `confirmDelete` flow with ConfirmDialog; localStorage cleared; cancel path also tested |
+| REQ-006 Persist in localStorage | Must | **Pass** ⚠ | `storageAdapter` read/write/corrupt-recovery tested; write failures not handled (Finding #1) |
+| REQ-007 Offline Support | Must | **Pass** ⚠ | SW exists with cache-first strategy and dynamic version invalidation; pre-cache list manually maintained (Finding #3) |
+| REQ-008 Responsive Layout | Must | **Pass** | Media queries at `<640px` / `≥640px` / `≥1024px`; touch targets ≥ 44px (`--size-touch-target`); mobile column stacking for buttons |
+| REQ-009 Keyboard Accessibility | Must | **Pass** | Focus trap in ConfirmDialog; Escape key handling; Tab cycling between dialog buttons; focus restoration to previous element on close; tested in `app.test.tsx` |
+| REQ-010 Screen Reader Accessibility | Must | **Pass** | ARIA labels on all interactive elements; `aria-live="assertive"` regions for toasts and announcements; `role="alertdialog"` on confirm dialog; single `main` landmark (verified by test); `prefers-reduced-motion` respected |
+| REQ-011 Input Character Limit | Should | **Pass** | `maxlength=200` on input; `CharCounter` with warning (≤20) and danger (0) color states; state machine rejects `TEXT_TOO_LONG` |
+| REQ-012 Confirmation on Delete | Should | **Pass** | `ConfirmDialog` with `role="alertdialog"`, `aria-modal="true"`, focus trap, Escape support, backdrop click to cancel |
+| REQ-013 Timestamp Display | Should | **Pass** | `formatAddedTimestamp` utility with just-now / min / hours / yesterday / days / date ranges; 60s refresh interval; tested in `time.test.ts` |
+| REQ-014 Empty State Illustration | Should | **Pass** | Animated orb with float + glow keyframe animations; responsive sizing across breakpoints; `aria-hidden="true"` |
+| REQ-015 Performance Budget | Must | **Pass** | JS: 9.93 KB gzip, CSS: 4.47 KB gzip — total ~14.4 KB, well under 50 KB |
 
 ---
 
 ## Verdict
 
-**PASS with warnings.** The application is functionally correct, well-tested, secure (no injection vectors, no backend surface), and performant. The four warnings are non-blocking polish items that should be addressed before production deploy. No blockers identified. No API keys or environment variables required.
+**PASS with warnings.** The application is functionally correct, well-tested (16 tests covering all critical paths), and performant. The state machine cleanly enforces the single-todo invariant. TypeScript, Preact, and the design system are used consistently. Accessibility implementation is strong — single `main` landmark, focus trap, ARIA labels, `prefers-reduced-motion`, live regions. No API keys or environment variables required. No blockers identified.
+
+The four warnings are non-blocking items that should be addressed before production deploy, with Finding #1 (`localStorage` write failure resilience) being the highest priority.
 
 | Severity | Count |
-|----------|-------|
+|---|---|
 | CRITICAL | 0 |
 | WARNING | 4 |
 | INFO | 1 |
