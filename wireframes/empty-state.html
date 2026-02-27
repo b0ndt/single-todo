@@ -56,6 +56,7 @@
 
   --shadow-inset: inset 2px 3px 6px #00000060, inset -1px -1px 2px #FFFFFF06;
   --shadow-surface: 2px 3px 8px #00000040, 1px 1px 2px #00000020;
+  --shadow-toast: 4px 6px 24px #00000080, 0 0 40px #00F0FF11;
 
   --glow-idle: 0 0 8px #00F0FF11;
   --glow-hover: 0 0 16px #00F0FF33, 0 0 40px #00F0FF11;
@@ -415,7 +416,6 @@ body {
   </header>
 
   <main class="app-content">
-    <!-- Empty Visual: The Orb -->
     <div class="empty-visual" aria-hidden="true">
       <div class="orb">
         <div class="orb-inner"></div>
@@ -423,11 +423,9 @@ body {
       <div class="orb-reflection"></div>
     </div>
 
-    <!-- Headline -->
     <h1 class="headline">What needs doing?</h1>
     <p class="supporting-text">One thing at a time. Add your focus.</p>
 
-    <!-- Input Group -->
     <div class="input-section">
       <form class="input-form" role="form" aria-label="Add a todo" onsubmit="handleSubmit(event)">
         <div class="input-wrapper" id="inputWrapper">
@@ -504,7 +502,7 @@ function handleSubmit(e) {
     return;
   }
   
-  alert('Todo created: "' + text + '"\n\n→ This wireframe would transition to active-todo.html');
+  window.location.href = 'active-todo.html';
 }
 
 input.focus();
