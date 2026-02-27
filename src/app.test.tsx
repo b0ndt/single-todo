@@ -8,7 +8,12 @@ const flushActionDelay = async () => {
   await vi.advanceTimersByTimeAsync(ACTION_LOADING_MS + 1);
 };
 
+const flushDialogOpen = async () => {
+  await vi.advanceTimersByTimeAsync(1);
+};
+
 const flushDialogExit = async () => {
+  await vi.advanceTimersByTimeAsync(1);
   await vi.advanceTimersByTimeAsync(CONFIRM_DIALOG_EXIT_MS + 1);
 };
 
@@ -66,6 +71,7 @@ describe('App critical paths', () => {
     await flushActionDelay();
 
     await user.click(screen.getByLabelText('Delete todo'));
+    await flushDialogOpen();
     expect(screen.getByRole('alertdialog')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Cancel delete'));
@@ -75,6 +81,7 @@ describe('App critical paths', () => {
     expect(screen.getByText('YOUR FOCUS')).toBeInTheDocument();
 
     await user.click(screen.getByLabelText('Delete todo'));
+    await flushDialogOpen();
     await user.click(screen.getByLabelText('Confirm delete'));
     await flushActionDelay();
     await flushDialogExit();
@@ -93,6 +100,7 @@ describe('App critical paths', () => {
     await flushActionDelay();
 
     await user.click(screen.getByLabelText('Delete todo'));
+    await flushDialogOpen();
 
     const keepButton = screen.getByLabelText('Cancel delete');
     const confirmButton = screen.getByLabelText('Confirm delete');
