@@ -19,30 +19,30 @@ export const ConfirmDialog = ({
 }: ConfirmDialogProps) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const [isRendered, setIsRendered] = useState(open);
+  const [isVisible, setIsVisible] = useState(open);
   const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setIsRendered(true);
+      setIsVisible(true);
       setIsExiting(false);
       return;
     }
 
-    if (!isRendered) {
+    if (!isVisible) {
       return;
     }
 
     setIsExiting(true);
     const timerId = window.setTimeout(() => {
-      setIsRendered(false);
+      setIsVisible(false);
       setIsExiting(false);
     }, CONFIRM_DIALOG_EXIT_MS);
 
     return () => {
       window.clearTimeout(timerId);
     };
-  }, [open, isRendered]);
+  }, [open, isVisible]);
 
   useEffect(() => {
     if (!open) {
@@ -100,7 +100,7 @@ export const ConfirmDialog = ({
     }
   }, [open]);
 
-  if (!isRendered) {
+  if (!open && !isVisible) {
     return null;
   }
 
