@@ -8,7 +8,8 @@ export const registerServiceWorker = (): void => {
   }
 
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((error) => {
+    const serviceWorkerUrl = `/sw.js?v=${encodeURIComponent(__APP_BUILD_ID__)}`;
+    navigator.serviceWorker.register(serviceWorkerUrl).catch((error) => {
       console.warn('single-todo: service worker registration failed', error);
     });
   });
