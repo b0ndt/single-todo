@@ -6,7 +6,7 @@
 
 ## Overview
 
-The AppShell is the root layout component. It provides the viewport container, background material, centering, and responsive padding. Every screen renders inside the AppShell.
+The AppShell is the root layout component. It provides the viewport container, background material, centering, and responsive padding. Every screen renders inside the AppShell. The void background is not flat — it has subtle radial gradients that create a concave depth illusion, as if the screen itself is a dimly lit chamber.
 
 ---
 
@@ -22,7 +22,7 @@ The AppShell is the root layout component. It provides the viewport container, b
 
 | State | Visual |
 |-------|--------|
-| Default | Deep black void background with subtle radial gradient |
+| Default | Deep black void background with subtle radial gradient vignetting |
 
 ---
 
@@ -126,6 +126,16 @@ body {
   }
 }
 ```
+
+---
+
+## Material Detail
+
+The void background uses two offset radial gradients:
+- **Top-left ellipse** (30% 20%): Lighter (#12121A) — simulates light from the 145° source
+- **Bottom-right ellipse** (70% 80%): Slightly lighter (#0D0D15) — ambient bounce light
+
+Together they create a barely-visible depth field that prevents the background from being dead flat.
 
 ---
 

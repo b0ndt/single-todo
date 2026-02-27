@@ -8,6 +8,8 @@
 
 The CharCounter displays remaining characters for the todo input. It lives below the input field and updates in real-time as the user types. It changes color to indicate warning (≤ 20 remaining) and danger (0 remaining) states.
 
+The counter is designed to be invisible until relevant. It appears when the user starts typing and shifts color as a gentle nudge — never an interruption. The color transitions are instantaneous (100ms) so the shift feels responsive to each keystroke.
+
 ---
 
 ## Variants

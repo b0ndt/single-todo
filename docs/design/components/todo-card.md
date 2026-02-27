@@ -8,6 +8,8 @@
 
 The TodoCard is the primary display surface for the active todo. It is a brushed-metal panel containing the embossed label, todo text, timestamp, and action buttons. Only visible when a todo exists (`status: "active"` or `status: "confirm-delete"`).
 
+The card is the most physically expressive element in the system. Its brushed-metal grain runs at 145° (aligned with the light source), its borders catch light asymmetrically, and its shadow falls to the bottom-right. Every detail reinforces that this is a real object sitting on the void.
+
 ---
 
 ## Variants
@@ -25,7 +27,7 @@ The TodoCard is the primary display surface for the active todo. It is a brushed
 |-------|--------|
 | **Default** | Brushed-metal surface, raised shadow, full color |
 | **Entering** | Scale 0.95 → 1, fade in, glow pulse |
-| **Exiting (complete)** | Scale → 0.95, fade out, green glow flash |
+| **Exiting (complete)** | Green glow flash, scale → 0.95, fade out |
 | **Exiting (delete confirmed)** | Fade out, handled by dialog close sequence |
 | **Dimmed** | `filter: brightness(0.4) blur(2px)`, non-interactive |
 
