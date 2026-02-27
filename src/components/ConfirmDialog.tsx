@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { CONFIRM_DIALOG_EXIT_MS, COPY } from '../constants';
 import { ActionButton } from './ActionButton';
 
@@ -44,7 +44,7 @@ export const ConfirmDialog = ({
     };
   }, [open, isVisible]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open) {
       return;
     }

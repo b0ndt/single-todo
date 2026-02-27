@@ -16,7 +16,7 @@ const flushDialogOpen = async () => {
 const flushDialogExit = async () => {
   await vi.advanceTimersByTimeAsync(1);
   await Promise.resolve();
-  await vi.advanceTimersByTimeAsync(CONFIRM_DIALOG_EXIT_MS + 1);
+  await vi.advanceTimersByTimeAsync(CONFIRM_DIALOG_EXIT_MS + ACTION_LOADING_MS + 10);
   await Promise.resolve();
 };
 
