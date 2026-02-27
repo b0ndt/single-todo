@@ -9,6 +9,7 @@ const APP_SHELL_ASSETS = [
   '/logo-dark.svg',
   '/logo-light.svg',
   '/favicon.svg',
+  '/og-image.svg',
 ];
 
 self.addEventListener('install', (event) => {

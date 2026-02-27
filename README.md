@@ -22,7 +22,7 @@ single-todo is a dark-mode, offline-capable Preact app that intentionally allows
 
 ## Design assets
 
-- Runtime brand assets are loaded from `public/` (`logo.svg`, `logo-dark.svg`, `logo-light.svg`, `favicon.svg`).
+- Runtime brand assets are loaded from `public/` (`logo.svg`, `logo-dark.svg`, `logo-light.svg`, `favicon.svg`, `og-image.svg`).
 - Screen/layout fidelity is implemented from `wireframes/*.html` and the design specs in `docs/design/`.
 - `docs/design/mockups/*.png` assets are treated as visual references when present; the shipped UI does not depend on those files at runtime.
 
